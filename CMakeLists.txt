@@ -9,4 +9,9 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(src)
 
+target_include_directories(BooleanIR PUBLIC
+        include
+        )
 
+target_link_libraries(BooleanIRSimple PUBLIC
+        BooleanIR)
