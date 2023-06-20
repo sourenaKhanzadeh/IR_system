@@ -27,18 +27,18 @@ BooleanRetrievalSimple::~BooleanRetrievalSimple() {
 
 std::vector<Document> BooleanRetrievalSimple::search(std::string query) {
     std::vector<Document> result;
-    std::vector<std::string> words = split(query, ' ');
+    std::vector<std::string> words = split(std::move(query), ' ');
     bool* queryBooleanTable = new bool[indexSize];
-    for (int i = 0; i < indexSize; ++i) {
-        queryBooleanTable[i] = false;
-    }
-    for (int i = 0; i < words.size(); ++i) {
-        for (int j = 0; j < indexSize; ++j) {
-            if (words[i] == documents[index[j]].title) {
-                queryBooleanTable[j] = true;
+    for (const auto & word : words) {
+        if (wordIndexMap.find(word) != wordIndexMap.end()) {
+            int wordIndex = wordIndexMap[word];
+            for (int i = 0; i < indexSize; ++i) {
+                queryBooleanTable[i] = booleanTable[wordIndex][i];
             }
         }
     }
+
+
     for (int i = 0; i < booleanTableSize; ++i) {
         bool found = true;
         for (int j = 0; j < indexSize; ++j) {
@@ -66,8 +66,8 @@ void BooleanRetrievalSimple::addDocument(std::string title, std::string content)
         delete[] documents;
         documents = temp;
     }
-    documents[documentCount].title = title;
-    documents[documentCount++].content = content;
+    documents[documentCount].title = std::move(title);
+    documents[documentCount++].content = std::move(content);
 }
 
 void BooleanRetrievalSimple::printDocuments() {
@@ -90,14 +90,15 @@ void BooleanRetrievalSimple::printBooleanTable() {
 void BooleanRetrievalSimple::makeBooleanTable() {
     for (int i = 0; i < documentCount; ++i) {
         std::vector<std::string> words = split(documents[i].content, ' ');
-        for (int j = 0; j < words.size(); ++j) {
+        for (const auto & word : words) {
             bool found = false;
             for (int k = 0; k < indexSize; ++k) {
-                if (words[j] == documents[index[k]].title) {
+                if (word == documents[index[k]].content) {
                     found = true;
                     booleanTable[i][k] = true;
                 }
             }
+            wordIndexMap[word] = i;
             if (!found) {
                 if (indexSize == indexCapacity) {
                     indexCapacity *= 2;
@@ -131,16 +132,13 @@ void BooleanRetrievalSimple::makeBooleanTable() {
 
 FileHandler::FileHandler() {
     lineCount = 0;
-    documentCount = 0;
-    documentCapacity = 10;
 }
 
 FileHandler::~FileHandler() {
     delete[] lines;
-    delete[] documents;
 }
 
-void FileHandler::walk(std::string path) {
+void FileHandler::walk(const std::string& path) {
     // walk a path and get all .txt files as a document
     // using the filesystem library
     for (const auto & entry : std::filesystem::directory_iterator(path)) {
@@ -157,35 +155,20 @@ void FileHandler::walk(std::string path) {
 }
 
 void FileHandler::addDocument(std::string title, std::string content) {
-    int documentSize = documentCount;
-    if (documentCount == documentCapacity) {
-        documentCapacity *= 2;
-        Document* temp = new Document[documentCapacity];
-        for (int i = 0; i < documentSize; ++i) {
-            temp[i] = documents[i];
-        }
-        delete[] documents;
-        documents = temp;
-    }
-    documents[documentCount].title = title;
-    documents[documentCount++].content = content;
+    Document document;
+    document.title = std::move(title);
+    document.content = std::move(content);
+    documents.push_back(document);
 }
 
 std::string* FileHandler::getLines() {
     return lines;
 }
 
-Document* FileHandler::getDocuments() {
+std::vector<Document> FileHandler::getDocuments() {
     return documents;
 }
 
-int FileHandler::getLineCount() {
-    return lineCount;
-}
-
-int FileHandler::getDocumentCount() {
-    return documentCount;
-}
 
 std::vector<std::string> split(std::string str, char delimiter) {
     std::vector<std::string> result;

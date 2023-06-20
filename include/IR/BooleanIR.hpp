@@ -10,6 +10,8 @@
 #include <vector>
 #include <fstream>
 #include <filesystem>
+#include <utility>
+#include <map>
 
 struct Document {
     std::string title;
@@ -37,25 +39,22 @@ protected:
     bool** booleanTable;
     int booleanTableSize;
     int booleanTableCapacity;
+    std::map<std::string, int> wordIndexMap;
 };
 
 class FileHandler{
 public:
     FileHandler();
     ~FileHandler();
-    void walk(std::string path);
+    void walk(const std::string& path);
     std::string* getLines();
-    int getLineCount();
-    Document* getDocuments();
-    int getDocumentCount();
+    std::vector<Document> getDocuments();
 protected:
     void addDocument(std::string title, std::string content);
 private:
-    std::string* lines;
+    std::string* lines{};
     int lineCount;
-    Document* documents;
-    int documentCount;
-    int documentCapacity;
+    std::vector<Document> documents;
 };
 
 std::vector<std::string> split(std::string str, char delimiter);
