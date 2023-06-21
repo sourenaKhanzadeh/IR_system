@@ -15,3 +15,6 @@ target_include_directories(BooleanIR PUBLIC
 
 target_link_libraries(BooleanIRSimple PUBLIC
         BooleanIR)
+
+target_link_libraries(BooleanIRInverted PUBLIC
+        BooleanIR)

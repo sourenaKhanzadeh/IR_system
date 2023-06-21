@@ -42,6 +42,40 @@ protected:
     std::map<std::string, int> wordIndexMap;
 };
 
+
+
+class InvertedIndex{
+public:
+    InvertedIndex();
+    ~InvertedIndex();
+    void addDocument(std::string title, std::string content);
+    void printDocuments();
+    void printInvertedIndex();
+    void makeInvertedIndex();
+    Document* getDocuments(){return documents;}
+    std::map<std::string, std::vector<int>> getInvertedIndex(){return invertedIndex;}
+protected:
+private:
+    Document* documents;
+    int documentCount;
+    int documentCapacity;
+    std::map<std::string, std::vector<int>> invertedIndex;
+    std::map<std::string, int> wordIndexMap;
+};
+
+
+class BooleanRetrievalII {
+public:
+    BooleanRetrievalII();
+    ~BooleanRetrievalII();
+    std::vector<Document> search(std::string query);
+    void setInvertedIndex(InvertedIndex *invertedIndex);
+protected:
+private:
+    InvertedIndex *invertedIndex;
+};
+
+
 class FileHandler{
 public:
     FileHandler();

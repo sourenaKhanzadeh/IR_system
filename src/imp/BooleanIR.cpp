@@ -185,3 +185,87 @@ std::vector<std::string> split(std::string str, char delimiter) {
     return result;
 }
 
+
+InvertedIndex::InvertedIndex() {
+    documentCount = 0;
+    documentCapacity = 10;
+    documents = new Document[documentCapacity];
+}
+
+InvertedIndex::~InvertedIndex() {
+    delete[] documents;
+}
+
+void InvertedIndex::addDocument(std::string title, std::string content) {
+    int documentSize = documentCount;
+    if (documentCount == documentCapacity) {
+        documentCapacity *= 2;
+        Document* temp = new Document[documentCapacity];
+        for (int i = 0; i < documentSize; ++i) {
+            temp[i] = documents[i];
+        }
+        delete[] documents;
+        documents = temp;
+    }
+    documents[documentCount].title = std::move(title);
+    documents[documentCount++].content = std::move(content);
+}
+
+void InvertedIndex::printDocuments() {
+    for (int i = 0; i < documentCount; ++i) {
+        std::cout << documents[i].title << std::endl;
+        std::cout << documents[i].content << std::endl;
+    }
+}
+
+void InvertedIndex::printInvertedIndex() {
+    for (auto & it : invertedIndex) {
+        std::cout << it.first << ": ";
+        for (int i : it.second) {
+            std::cout << i << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+void InvertedIndex::makeInvertedIndex() {
+    for (int i = 0; i < documentCount; ++i) {
+        std::vector<std::string> words = split(documents[i].content, ' ');
+        for (const auto & word : words) {
+            invertedIndex[word].push_back(i);
+        }
+    }
+}
+
+BooleanRetrievalII::BooleanRetrievalII() {
+}
+
+BooleanRetrievalII::~BooleanRetrievalII() {
+
+}
+
+void BooleanRetrievalII::setInvertedIndex(InvertedIndex *invertedIndex) {
+    this->invertedIndex = invertedIndex;
+}
+
+std::vector<Document> BooleanRetrievalII::search(std::string query) {
+    std::vector<Document> result;
+    std::vector<std::string> words = split(query, ' ');
+    std::vector<int> documentIds;
+    for (const auto & word : words) {
+        if (invertedIndex->getInvertedIndex().find(word) != invertedIndex->getInvertedIndex().end()) {
+            std::vector<int> temp = invertedIndex->getInvertedIndex()[word];
+            if (documentIds.empty()) {
+                documentIds = temp;
+            } else {
+                std::vector<int> intersection;
+                std::set_intersection(documentIds.begin(), documentIds.end(), temp.begin(), temp.end(), std::back_inserter(intersection));
+                documentIds = intersection;
+            }
+        }
+    }
+    for (int documentId : documentIds) {
+        result.push_back(invertedIndex->getDocuments()[documentId]);
+    }
+    return result;
+}

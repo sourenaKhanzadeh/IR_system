@@ -1,2 +1,3 @@
 add_subdirectory(booleanR)
+add_subdirectory(booleanInvertedIR)
 add_subdirectory(imp)
