@@ -13,8 +13,19 @@ target_include_directories(BooleanIR PUBLIC
         include
         )
 
+target_include_directories(TextProcessing PUBLIC
+        include
+        )
+
 target_link_libraries(BooleanIRSimple PUBLIC
         BooleanIR)
 
 target_link_libraries(BooleanIRInverted PUBLIC
         BooleanIR)
+
+target_link_libraries(
+        TextProc
+        PUBLIC
+        TextProcessing
+        BooleanIR
+)

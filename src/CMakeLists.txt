@@ -1,3 +1,4 @@
 add_subdirectory(booleanR)
 add_subdirectory(booleanInvertedIR)
+add_subdirectory(textProc)
 add_subdirectory(imp)
